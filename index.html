@@ -294,6 +294,19 @@ input,select,textarea{font-size:16px!important;}
   .hint{font-size:12px;color:var(--txt3);margin:6px 2px 0;line-height:1.6;}
 
   .fade-list{animation:fade .25s ease;}
+
+  /* ===== 学业待办看板 ===== */
+  .board-intro{background:linear-gradient(145deg,rgba(124,108,255,.16),rgba(34,211,238,.07));border:1px solid rgba(124,108,255,.3);border-radius:18px;padding:15px;margin:14px 0;}
+  .board-intro b{display:block;font-size:15px;margin-bottom:4px}.board-intro p{margin:0;color:var(--txt2);font-size:12px;line-height:1.65}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 12px}.legend span{display:flex;align-items:center;gap:5px;color:var(--txt2);font-size:11px}.legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .cal-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 10px;margin-bottom:13px;}
+  .cal-toolbar{display:flex;align-items:center;justify-content:space-between;margin:0 3px 10px}.cal-toolbar b{font-size:15px}.cal-toolbar button{border:1px solid var(--line);background:#252742;color:var(--txt);border-radius:9px;padding:6px 11px;font-size:14px}
+  .cal-dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center;color:var(--txt3);font-size:10px;margin-bottom:4px}
+  .cal-week{margin-bottom:5px}.cal-week-dates{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}.cal-day{height:47px;border-radius:8px;text-align:center;padding:4px 1px 2px;border:1px solid transparent;color:var(--txt2);cursor:pointer;position:relative;font-size:12px}.cal-day.outside{opacity:.25}.cal-day.today{border-color:var(--accent2)}.cal-day.selected{background:rgba(124,108,255,.2);color:#fff}.cal-day .day-num{display:block;font-weight:700}.cal-day .day-dots{display:flex;justify-content:center;gap:2px;margin-top:4px}.cal-day .day-dots i{width:5px;height:5px;border-radius:50%;display:block}.week-bars{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:17px;gap:2px 2px;margin:1px 0 2px}.week-bar{height:15px;line-height:15px;border-radius:5px;padding:0 4px;font-size:9px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#111827}.week-bar.exam{background:#ff718c}.week-bar.assignment{background:#bd8cff}.week-bar.project{background:#48c9e8}.week-bar.capstone{background:#63dda6}.week-bar.school{background:#9aa3b8}.week-bar.study{background:#ffd166}
+  .agenda-head{display:flex;align-items:center;justify-content:space-between;margin:12px 3px 8px}.agenda-head b{font-size:13px}.agenda-head small{font-size:11px;color:var(--txt3)}
+  .board-event{display:flex;gap:9px;align-items:flex-start;background:#181a30;border:1px solid var(--line);border-radius:12px;padding:10px;margin:7px 0}.event-mark{width:4px;align-self:stretch;border-radius:8px;flex:0 0 auto}.event-content{min-width:0;flex:1}.event-content b{display:block;font-size:12px;line-height:1.45}.event-content small{display:block;color:var(--txt3);font-size:10px;margin-top:3px;line-height:1.45}.event-check{accent-color:var(--green);width:17px;height:17px;flex:0 0 auto;margin:2px 0 0}.event-link{color:var(--cyan);font-size:10px;text-decoration:none;white-space:nowrap}
+  .board-columns{display:grid;grid-template-columns:1fr;gap:12px}.board-section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px}.board-section h3{font-size:14px;margin:0 0 9px}.board-section .count{font-size:11px;color:var(--txt3);font-weight:500;margin-left:5px}.board-add{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.board-add input,.board-add select{min-width:0;background:#16172b;border:1px solid var(--line);color:var(--txt);padding:9px;border-radius:10px;font-family:inherit}.board-add input:first-child{grid-column:1/-1}.board-add button{grid-column:1/-1;border:0;border-radius:10px;padding:10px;color:white;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:700}.board-source{display:inline-block;margin-top:4px;color:var(--cyan);font-size:10px;text-decoration:none}
+  @media(min-width:640px){.board-columns{grid-template-columns:1fr 1fr}.cal-day{height:57px}.cal-card{padding:16px}}
 </style>
 </head>
 <body>
@@ -348,6 +361,19 @@ input,select,textarea{font-size:16px!important;}
     <div id="pillarList"></div>
 
     <div class="hint">💡 点卡片展开查看任务，点圆圈打勾；任务可以自己加、自己删。</div>
+  </section>
+
+  <!-- ========== 学习待办看板 ========== -->
+  <section id="page-board" class="page">
+    <div class="topbar"><div><div class="hello">学习<span>看板</span></div><div class="date-txt">课程、作业与重要事项统一跟踪</div></div></div>
+    <div class="board-intro"><b>学期主线 · 2026 T1</b><p>6006：10/28 期中，11/23–12/13（W12–W14）项目窗口；按真实通知管理考试与DDL，区间色条表示持续任务。月历日期可点开查看当天事项。</p></div>
+    <div class="sec-title"><h2>课程日历</h2><span class="sub">点日期看事项 · 色条表示持续任务</span></div>
+    <div class="legend"><span><i style="background:#ff718c"></i>考试</span><span><i style="background:#bd8cff"></i>作业/DDL</span><span><i style="background:#48c9e8"></i>课程项目</span><span><i style="background:#63dda6"></i>Capstone</span><span><i style="background:#9aa3b8"></i>校历</span><span><i style="background:#ffd166"></i>复习计划</span></div>
+    <div class="cal-card"><div class="cal-toolbar"><button onclick="shiftBoardMonth(-1)" aria-label="上个月">‹</button><b id="boardMonthLabel"></b><button onclick="shiftBoardMonth(1)" aria-label="下个月">›</button></div><div class="cal-dow"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div id="boardCalendar"></div><div class="agenda-head"><b id="agendaDate"></b><small id="agendaCount"></small></div><div id="boardAgenda"></div></div>
+    <div class="board-columns">
+      <div class="board-section"><h3>① 待办作业 <span class="count" id="assignmentCount"></span></h3><div id="assignmentList"></div><div class="board-add"><input id="assignmentTitle" placeholder="添加作业 / 交付物"><input id="assignmentDue" type="date" aria-label="开始日期"><input id="assignmentEnd" type="date" aria-label="截止日期"><button onclick="addBoardItem('assignment')">＋ 添加作业</button></div></div>
+      <div class="board-section"><h3>② 重要事项 / 课程 <span class="count" id="importantCount"></span></h3><div id="importantList"></div><div class="board-add"><input id="importantTitle" placeholder="添加 Outlook / BB / BR 事项"><input id="importantDue" type="date" aria-label="开始日期"><input id="importantEnd" type="date" aria-label="截止日期"><button onclick="addBoardItem('important')">＋ 添加事项</button></div><div class="hint">邮件事项可把邮件主题写在任务里；BB/BR 公告按实际日期录入，自动进入日历。</div></div>
+    </div>
   </section>
 
   <!-- ========== 运动页 ========== -->
@@ -456,6 +482,7 @@ input,select,textarea{font-size:16px!important;}
 <!-- 底部导航 -->
 <nav class="tabs">
   <button class="tab active" data-page="today"><span class="ico">🏠</span>今日</button>
+  <button class="tab" data-page="board"><span class="ico">🗓️</span>看板</button>
   <button class="tab" data-page="fitness"><span class="ico">🏃</span>运动</button>
   <button class="tab" data-page="money"><span class="ico">💰</span>记账</button>
   <button class="tab" data-page="stats"><span class="ico">📊</span>统计</button>
@@ -498,7 +525,7 @@ const todayStr = () => { const d=new Date(); return d.getFullYear()+'-'+String(d
 /* =========================================================
    学业主线：3 门课程 + Capstone
    - 每项都写明预计时长与验收标准
-   - CIE6006 第 7 周期中按 10 月 21 日预排，最终以 BB 公告为准
+   - CIE6006 期中按 Outlook 正式通知排在 10 月 28 日 15:30–17:00
    - CIE6007 项目按 11 月 25 日倒排
    ========================================================= */
 const STUDY_PLAN_EXACT = {
@@ -508,21 +535,22 @@ const STUDY_PLAN_EXACT = {
   '2026-10-14':['【CIE6006·105m】Machine Learning-I：完成15道选择/计算/解释题，正确≥12道；补齐错题卡','【CIE6007·45m】Decision Tree/KNN：各写算法流程、关键超参、1个适用与不适用场景','【Capstone·30m】更新论文矩阵1行，并写给导师汇报时可直接使用的3句话'],
   '2026-10-15':['【CIE6006·105m】Machine Learning-II：闭卷画训练→验证→测试流程，完成15题，正确≥12道','【AIS6002·45m】作业前置：检查HW1–HW5状态；对当前作业至少推进1个可提交小问','【CIE6007项目·30m】确定题目、问题定义、baseline与主指标，写成150字mini proposal'],
   '2026-10-16':['【CIE6006·105m】降维与可视化：完成12题，能解释PCA目标、信息损失及3种误导图表','【CIE6007·45m】SVM/Logistic Regression对比：闭卷写损失、决策边界、正则化作用','【Capstone·30m】精读1篇Adaptive KD论文，提取权重信号、baseline、数据集与局限'],
-  '2026-10-17':['【CIE6006·105m】Recommendation Systems：完成12题，能区分content-based与CF并解释冷启动','【AIS6002·45m】生成模型概念自测10题，正确≥8；错题回到讲义定位页码','【CIE6007项目·30m】找到可下载数据集并跑通读取/划分；保存样本数与类别分布'],
+  '2026-10-17':['【CIE6006·105m】Similarity Search二轮：完成12道概念/计算题，正确≥10；解释近似搜索取舍','【AIS6002·45m】生成模型概念自测10题，正确≥8；错题回到讲义定位页码','【CIE6007项目·30m】找到可下载数据集并跑通读取/划分；保存样本数与类别分布'],
   '2026-10-18':['【CIE6006·120m】第一次综合模拟：30题限时90分钟，得分≥75%；剩余30分钟分类错因','【CIE6007·30m】回顾本周课堂，做8道概念题，至少答对6道','【周复盘·30m】统计本周完成率；把未达标题型加入10月19–20补强清单'],
   '2026-10-19':['【CIE6006·120m】弱项补强：针对模拟最低的2章各做10题，正确率均≥80%','【AIS6002·45m】把本周内容讲给“零基础同学”：录/写5分钟解释，检查逻辑断点','【Capstone·30m】将2篇新论文加入矩阵，明确与自己方向的相同点和差异点'],
   '2026-10-20':['【CIE6006·135m】第二次综合模拟：限时完成，目标≥80%；所有错题必须写出正确推理链','【CIE6006·30m】闭卷重建一页公式/算法/陷阱表，再与讲义核对补漏','【CIE6007项目·15m】确认仓库结构与下一步实验清单，避免期中后重新启动'],
-  '2026-10-21':['【CIE6006·45m】考前轻复盘：只看错题与一页表；随机口答10题，≥9题清楚作答','【CIE6006】预计第7周期中：按BB实际时间执行；考后记录3类不确定题','【恢复·30m】考试后只做资料归档和明日计划，不安排高负荷新知识'],
-  '2026-10-22':['【CIE6006·45m】考后复盘：按知识/计算/审题分类失分，生成期末回补清单','【CIE6007项目·90m】建立baseline脚本，成功完成1次端到端训练/推理并保存指标','【AIS6002·45m】课堂后24小时整理：1页结构化笔记+5道自测，正确≥4'],
-  '2026-10-23':['【CIE6007项目·90m】完成数据清洗、划分与统计图；检查泄漏并记录随机种子','【Capstone·60m】精读1篇MLLM/CLIP蒸馏论文，补齐9字段笔记和1个复现实验点','【AIS6002·30m】推进当前作业1个小问；结果需可复算或代码可运行'],
-  '2026-10-24':['【CIE6006项目·75m】提出2个城市数据分析题；每个列2类数据源、>1000记录可行性与模型','【CIE6007·60m】Neural Network基础：闭卷写forward/loss/backprop链并做8题，正确≥6','【周整理·30m】将三门课本周讲义各压缩成“1页主线+错题入口”'],
-  '2026-10-25':['【CIE6007项目·105m】完成baseline正式实验，保存配置、指标和至少2张可解释图','【AIS6002项目·45m】列3个候选方向，按创新性/可执行性/数据与算力筛到1个','【Capstone·30m】周总结：写已知/未知/下一步各3条，形成可汇报版本'],
-  '2026-10-26':['【CIE6007项目·90m】设计3组对照实验；每组明确只改变1个因素和预期结论','【CIE6006项目·45m】选定主问题与两类数据源，写200字研究问题和评价指标','【AIS6002·45m】完成本周预习：标出5个陌生点，课后逐项消除至少4个'],
-  '2026-10-27':['【CIE6007·75m】CNN：完成10道结构/尺寸/参数量题，正确≥8；错题写计算步骤','【AIS6002项目·60m】完成1页proposal骨架：问题、方法、baseline、数据、指标、风险','【Capstone·45m】精读第5篇代表论文；补矩阵并写与已有4篇的关系'],
-  '2026-10-28':['【CIE6006·60m】Graph Analytics-I课后巩固：画知识图，完成8道题，正确≥6','【CIE6007项目·90m】运行第1组对照实验，保存日志并写100字结果解释','【AIS6002·30m】自测10题，正确≥8；低于8则次日追加20分钟回补'],
+  '2026-10-21':['【CIE6006·90m】Problem-solving专项：限时完成4道综合题，至少3道步骤完整；逐步标注失分点','【AIS6002·45m】整理最近一讲：5概念+3机制/公式+2疑问，完成5题自测≥4','【Capstone·45m】精读1篇蒸馏论文，明确teacher/student/knowledge/loss/result/limitation'],
+  '2026-10-22':['【CIE6006·90m】Similarity Search专项：限时做12题，正确≥10；错题注明距离度量或近似检索依据','【CIE6007项目·60m】建立baseline脚本，跑通1次端到端训练/推理并保存指标','【AIS6002·30m】整理本周讲义为1页结构化笔记'],
+  '2026-10-23':['【CIE6006·90m】Machine Learning专项：完成15道选择/计算/解释题，正确≥13；重点核查模型假设与评估','【CIE6007项目·60m】完成数据清洗、划分与统计图；检查泄漏并记录随机种子','【Capstone·30m】补1篇论文矩阵并写1个可验证局限'],
+  '2026-10-24':['【CIE6006·90m】Dimensionality Reduction专项：12题正确≥10；闭卷解释PCA目标、方差保留与信息损失','【CIE6007·45m】Neural Network基础：写出forward/loss/backprop链并做8题，正确≥6','【CIE6006·30m】起草A4双面cheat sheet框架，按题型留出关键公式/步骤'],
+  '2026-10-25':['【CIE6006·120m】完整模拟卷1：10道选择+4道解题，限时90分钟；目标≥80%，剩余30分钟订正','【AIS6002项目·45m】列3个候选方向，按创新性/可执行性/数据与算力筛到1个','【Capstone·30m】周总结：写已知/未知/下一步各3条'],
+  '2026-10-26':['【CIE6006·105m】按模拟最低的2类题各补10题，正确率分别≥85%；错题重做一次不看答案','【CIE6006·45m】完成A4双面手写稿v1；核对公式、单位、算法步骤可读且不超页','【AIS6002·30m】本周预习标出5个陌生点，至少消除4个'],
+  '2026-10-27':['【CIE6006·105m】完整模拟卷2：10道选择+4道解题，限时90分钟；目标≥85%','【CIE6006·30m】A4双面手写cheat sheet终校；核对校园卡、计算器与 Outlook 考场分配','【Capstone·30m】精读第5篇代表论文；补矩阵并写与已有论文的关系'],
+  '2026-10-28':['【CIE6006·30m】考前只看错题和A4手写表，随机口答10题至少9题思路清楚','【CIE6006·15:30】期中考试：15:30–17:00，闭卷90分钟；带校园卡、计算器、双面手写A4纸','【考后·30m】记录不确定题与失分类型，不当场改答案；晚间轻复盘'],
+  '2026-10-29':['【CIE6006·45m】考后复盘：按知识/计算/审题分类，生成期末回补清单','【CIE6007项目·90m】建立baseline并成功完成1次端到端训练/推理，保存指标','【AIS6002·45m】课堂后24小时整理：1页结构化笔记+5道自测，正确≥4'],
   '2026-10-29':['【AIS6002·60m】课堂后整理：5概念+3机制/公式+2疑问，并把疑问定位到资料','【CIE6007项目·90m】运行第2组对照实验，制作统一格式结果表','【Capstone·30m】整理导师下次可能追问的5个问题并各写2句回答'],
   '2026-10-30':['【CIE6007项目·105m】运行第3组对照实验；检查结果是否支持结论，记录异常','【CIE6006项目·45m】验证数据获取：各下载/抓取小样本，记录字段、缺失率和许可','【AIS6002作业·30m】推进1个小问并自检推导/代码/文字说明'],
-  '2026-10-31':['【CIE6007·75m】Week1–8阶段测：25题限时，目标≥80%；建立期末错题索引','【AIS6002项目·60m】跑通最小可行baseline或完成伪代码与数据流图','【Capstone·45m】完成第6篇论文笔记，论文矩阵累计≥6篇且字段完整'],
+  '2026-10-31':['【CIE6006·20m】确认 Urban Data Analysis 项目组信息已在表格提交，核对组员与题目相关性','【CIE6007·60m】Week1–8阶段测：25题限时，目标≥80%；建立期末错题索引','【Capstone·40m】完成第6篇论文笔记，论文矩阵累计≥6篇且字段完整'],
   '2026-11-01':['【周复盘·45m】检查四条主线：6007实验≥3组、6006数据可得、6002方案成形、Capstone≥6篇','【CIE6007项目·90m】根据实验结果锁定报告主结论，列出仍缺的2个证据','【缓冲·45m】清理本周未完成项；若全部完成，提前做下周最高风险任务']
 };
 
@@ -659,7 +687,8 @@ const DEFAULT_STATE = {
   body: {},        // { '2026-10-11': {weight:52.5, thigh:50, calf:33} }
   plan: {},        // { '2026-10-11': [0,1,3] } 运动计划完成项(按周几索引)
   money: { budget:0, txs: [] }, // txs: {id,date,name,amt,cat,type}
-  streak: { current:0, best:0, last:'' }
+  streak: { current:0, best:0, last:'' },
+  boardDone:{}, boardCustom:[]
 };
 
 let S = load();
@@ -675,6 +704,8 @@ function load(){
     merged.tasks = Object.assign(base.tasks, d.tasks||{});
     merged.money = Object.assign(base.money, d.money||{});
     merged.streak = Object.assign(base.streak, d.streak||{});
+    merged.boardDone = Object.assign(base.boardDone, d.boardDone||{});
+    merged.boardCustom = Array.isArray(d.boardCustom)?d.boardCustom:[];
     return merged;
   }catch(e){ return JSON.parse(JSON.stringify(DEFAULT_STATE)); }
 }
@@ -702,6 +733,36 @@ const PILLARS = [
 
 const MOODS = ['😫','😔','😐','🙂','😄'];
 
+/* 学期作业与事项：官方日期来自 Outlook/课程安排，计划检查点明确标为计划。 */
+const BOARD_ITEMS = [
+  {id:'a-6006-team',section:'assignment',title:'CIE6006｜Urban Data Analysis 项目组信息登记',due:'2026-10-31',start:'2026-09-21',type:'assignment',source:'Outlook：CIE6006 Project Team Registration（9/21）'},
+  {id:'a-6006-m1',section:'assignment',title:'CIE6006 项目计划检查点｜锁定问题、两类数据源与 >1000 条数据可行性',due:'2026-10-30',start:'2026-10-12',type:'project',source:'支点倒排检查点（计划日期，非教师官方 DDL）'},
+  {id:'a-6006-m2',section:'assignment',title:'CIE6006 项目计划检查点｜完成数据获取/清洗，输出字段表与缺失率',due:'2026-11-08',start:'2026-10-31',type:'project',source:'支点倒排检查点（计划日期，非教师官方 DDL）'},
+  {id:'a-6006-m3',section:'assignment',title:'CIE6006 项目计划检查点｜完成探索分析与至少一个推断/预测 baseline',due:'2026-11-15',start:'2026-11-09',type:'project',source:'支点倒排检查点（计划日期，非教师官方 DDL）'},
+  {id:'a-6006-m4',section:'assignment',title:'CIE6006 项目计划检查点｜报告 v1、10 分钟展示稿与 3 分钟问答提纲',due:'2026-11-22',start:'2026-11-16',type:'project',source:'支点倒排检查点（计划日期，非教师官方 DDL）'},
+  {id:'a-6006-project',section:'assignment',title:'CIE6006｜项目展示与报告（W12–W14 时间窗，具体日期待 BB 确认）',due:'',start:'2026-11-23',end:'2026-12-13',type:'project',source:'课程安排：W12–W14 presentation；报告最终 DDL 以 BB 为准'},
+  {id:'a-6007-project',section:'assignment',title:'CIE6007｜个人机器学习项目提交',due:'2026-11-25',start:'2026-10-12',type:'project',source:'CIE6007 Project Guidelines / BB'},
+  {id:'a-6002-hw',section:'assignment',title:'AIS6002｜5 次作业：每次按 BB 公布的 DDL 登记',due:'',start:'',type:'assignment',source:'课程要求：5 次作业，共 30%；不接受迟交'},
+  {id:'a-6006-hw',section:'assignment',title:'CIE6006｜课程作业（1 项，按 BB DDL 登记）',due:'',start:'',type:'assignment',source:'课程考核：Homework 10%'},
+  {id:'a-6007-hw',section:'assignment',title:'CIE6007｜作业 4–5 次（收到 BB DDL 后逐项录入）',due:'',start:'',type:'assignment',source:'课程考核：Assignments 20%'},
+  {id:'i-6006-exam',section:'important',title:'CIE6006 期中考试｜10/28 周三 15:30–17:00；闭卷 90 分钟；100 分',due:'2026-10-28',start:'2026-10-28',type:'exam',source:'Outlook：Important: Mid-term Exam Arrangements｜考场 6A-608/609，以邮件链接查分配'},
+  {id:'i-6006-room',section:'important',title:'CIE6006｜查看 Outlook 邮件中的考场分配；带校园卡、计算器及双面手写 A4 纸',due:'2026-10-27',start:'2026-10-27',type:'exam',source:'考前提醒：实际教室需打开 Outlook 原邮件里的 SharePoint 名单核对'},
+  {id:'i-bb-check',section:'important',title:'每周检查 BB/BR：课程公告、作业 DDL、考试与项目要求',due:'',start:'',type:'study',source:'把新通知通过下方输入框记入看板；避免遗漏更新'},
+  {id:'i-final-period',section:'important',title:'校历｜第一学期集中考试期',due:'2026-12-27',start:'2026-12-20',end:'2026-12-27',type:'school',source:'CUHK(SZ) 2026–27 Academic Calendar（Tentative）；逐门考试时间待校方公布'},
+  {id:'i-capstone',section:'important',title:'Capstone｜文献→研究缺口→方法假设→最小实验→导师汇报',due:'',start:'2026-10-12',end:'2027-01-10',type:'capstone',source:'持续推进；考试周降载，独立探索期集中推进'}
+];
+
+const BOARD_RANGES = [
+  {id:'r-6006-prep',title:'6006 期中复习',start:'2026-10-12',end:'2026-10-27',type:'study'},
+  {id:'r-6007-project',title:'6007 项目推进',start:'2026-10-12',end:'2026-11-24',type:'project'},
+  {id:'r-6006-build',title:'6006 项目前置推进',start:'2026-10-29',end:'2026-11-22',type:'project'},
+  {id:'r-6006-project-window',title:'6006 W12–W14 项目展示/报告窗口',start:'2026-11-23',end:'2026-12-13',type:'project'},
+  {id:'r-capstone',title:'Capstone 研究主线',start:'2026-10-12',end:'2027-01-10',type:'capstone'},
+  {id:'r-final-exams',title:'第一学期集中考试期',start:'2026-12-20',end:'2026-12-27',type:'school'}
+];
+
+const BOARD_COLORS={exam:'#ff718c',assignment:'#bd8cff',project:'#48c9e8',capstone:'#63dda6',school:'#9aa3b8',study:'#ffd166'};
+
 /* =========================================================
    工具
    ========================================================= */
@@ -716,6 +777,87 @@ function toast(msg){
 
 function dayChecks(d=todayStr()){ return S.checks[d] || (S.checks[d]={}); }
 function planDone(d=todayStr()){ return S.plan[d] || (S.plan[d]=[]); }
+
+/* =========================================================
+   学习待办看板：颜色日历 + 两类可勾选任务
+   ========================================================= */
+let boardMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let boardSelectedDate = todayStr();
+const boardDate = (y,m,d)=>`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+const boardMonthName = d=>`${d.getFullYear()}年${d.getMonth()+1}月`;
+const boardLongDate = value=>{const d=new Date(value+'T12:00:00');return `${d.getMonth()+1}月${d.getDate()}日 周${['日','一','二','三','四','五','六'][d.getDay()]}`;};
+function boardAllItems(){return [...BOARD_ITEMS,...(S.boardCustom||[])];}
+function boardEvents(){
+  const points=boardAllItems().filter(x=>x.due&&x.id!=='i-final-period').map(x=>({id:x.id,title:x.title,start:x.due,end:x.due,type:x.type,detail:x.source||'',taskId:x.id}));
+  const spans=[...BOARD_RANGES,...(S.boardCustom||[]).filter(x=>x.start&&x.end&&x.end>x.start).map(x=>({...x,id:'range-'+x.id,title:x.title}))].map(x=>({...x,end:x.end||x.start,detail:'持续推进计划'}));
+  return [...points,...spans];
+}
+function dateOverlap(a,b,c,d){return a<=d&&b>=c;}
+function shiftBoardMonth(n){boardMonth=new Date(boardMonth.getFullYear(),boardMonth.getMonth()+n,1);boardSelectedDate=boardDate(boardMonth.getFullYear(),boardMonth.getMonth(),1);renderBoard();}
+function renderBoard(){
+  if(!$('boardCalendar'))return;
+  $('boardMonthLabel').textContent=boardMonthName(boardMonth);
+  const y=boardMonth.getFullYear(),m=boardMonth.getMonth(),first=new Date(y,m,1),offset=(first.getDay()+6)%7,totalDays=new Date(y,m+1,0).getDate();
+  const weeks=Math.ceil((offset+totalDays)/7),events=boardEvents();
+  let html='';
+  for(let w=0;w<weeks;w++){
+    const ds=Array.from({length:7},(_,i)=>{
+      const n=w*7+i-offset+1,dt=new Date(y,m,n),value=boardDate(dt.getFullYear(),dt.getMonth(),dt.getDate()),inMonth=dt.getMonth()===m;
+      const matches=events.filter(e=>dateOverlap(e.start,e.end,value,value));
+      const colors=[...new Set(matches.map(e=>BOARD_COLORS[e.type]||BOARD_COLORS.study))].slice(0,4);
+      return {dt,value,n,inMonth,colors};
+    });
+    html+=`<div class="cal-week"><div class="cal-week-dates">${ds.map(c=>`<div class="cal-day ${c.inMonth?'':'outside'} ${c.value===todayStr()?'today':''} ${c.value===boardSelectedDate?'selected':''}" onclick="selectBoardDate('${c.value}')"><span class="day-num">${c.dt.getDate()}</span><span class="day-dots">${c.colors.map(color=>`<i style="background:${color}"></i>`).join('')}</span></div>`).join('')}</div>`;
+    const weekStart=ds[0].value,weekEnd=ds[6].value,active=events.filter(e=>e.start<e.end&&dateOverlap(e.start,e.end,weekStart,weekEnd)).sort((a,b)=>a.start.localeCompare(b.start)||a.end.localeCompare(b.end));
+    const lanes=[];let bars='';
+    active.forEach(e=>{
+      let s=Math.max(0,ds.findIndex(c=>c.value>=e.start)),t=0;ds.forEach((c,i)=>{if(c.value<=e.end)t=i;});t=Math.min(6,t);if(s<0||s>t)return;
+      let lane=0;while(lanes[lane]&&lanes[lane].some(r=>!(t<r[0]||s>r[1])))lane++;
+      (lanes[lane]||(lanes[lane]=[])).push([s,t]);
+      const label=s===0&&e.start<weekStart?`${e.title}（续）`:e.title;
+      bars+=`<div class="week-bar ${e.type}" style="grid-column:${s+1}/span ${t-s+1};grid-row:${lane+1}" title="${esc(e.title)}">${esc(label)}</div>`;
+    });
+    if(bars)html+=`<div class="week-bars" style="grid-template-rows:repeat(${lanes.length},17px)">${bars}</div>`;
+    html+='</div>';
+  }
+  $('boardCalendar').innerHTML=html;
+  renderBoardAgenda(events);
+  renderBoardLists();
+}
+function selectBoardDate(date){boardSelectedDate=date;renderBoard();}
+function renderBoardAgenda(events=boardEvents()){
+  const found=events.filter(e=>dateOverlap(e.start,e.end,boardSelectedDate,boardSelectedDate));
+  $('agendaDate').textContent=boardLongDate(boardSelectedDate);$('agendaCount').textContent=found.length?`${found.length} 项`:'无事项';
+  $('boardAgenda').innerHTML=found.length?found.map(e=>`<div class="board-event"><i class="event-mark" style="background:${BOARD_COLORS[e.type]||BOARD_COLORS.study}"></i><div class="event-content"><b>${esc(e.title)}</b><small>${e.start===e.end?boardLongDate(e.start):`${boardLongDate(e.start)}—${boardLongDate(e.end)} · 持续中`} · ${esc(e.detail||'')}</small></div>${e.taskId?`<input class="event-check" type="checkbox" ${S.boardDone[e.taskId]?'checked':''} onchange="toggleBoardItem('${esc(e.taskId)}')" aria-label="完成事项">`:''}</div>`).join(''):'<div class="empty" style="padding:14px">当天没有安排，可以把邮件或 BB/BR 通知添加到下方看板</div>';
+}
+function boardSourceLink(item){
+  if((item.source||'').includes('Outlook'))return `<a class="board-source" href="https://outlook.office.com/mail/" target="_blank" rel="noopener">↗ 打开 Outlook，按邮件主题查找</a>`;
+  if((item.source||'').includes('BB'))return `<a class="board-source" href="https://bb.cuhk.edu.cn/" target="_blank" rel="noopener">↗ 打开 BB 课程公告</a>`;
+  return '';
+}
+function boardItemMarkup(item){
+  const checked=!!S.boardDone[item.id],range=item.start?(item.end&&item.end!==item.start?`${boardLongDate(item.start)}—${boardLongDate(item.end)}`:boardLongDate(item.start)):'';
+  const due=item.due?`DDL ${boardLongDate(item.due)}`:'';
+  return `<div class="board-event"><i class="event-mark" style="background:${BOARD_COLORS[item.type]||BOARD_COLORS.assignment}"></i><div class="event-content"><b>${esc(item.title)}</b><small>${[range,due,item.source].filter(Boolean).map(esc).join(' · ')||'日期待 BB/教师通知后登记'}</small>${boardSourceLink(item)}</div><input class="event-check" type="checkbox" ${checked?'checked':''} onchange="toggleBoardItem('${esc(item.id)}')" aria-label="完成事项"></div>`;
+}
+function renderBoardLists(){
+  const all=boardAllItems();
+  ['assignment','important'].forEach(section=>{
+    const items=all.filter(x=>x.section===section),done=items.filter(x=>S.boardDone[x.id]).length;
+    $(section==='assignment'?'assignmentCount':'importantCount').textContent=`${done}/${items.length} 已完成`;
+    $(section==='assignment'?'assignmentList':'importantList').innerHTML=items.map(boardItemMarkup).join('');
+  });
+}
+function toggleBoardItem(id){S.boardDone[id]=!S.boardDone[id];save();renderBoard();}
+function addBoardItem(section){
+  const prefix=section==='assignment'?'assignment':'important',title=$(prefix+'Title').value.trim(),start=$(prefix+'Due').value,end=$(prefix+'End').value;
+  if(!title){toast('先写一下任务名称');return;}
+  if(start&&end&&end<start){toast('结束日期不能早于开始日期');return;}
+  const item={id:'u'+Date.now(),section,title,start:start||'',end:end||start||'',due:end||start||'',type:section==='assignment'?'assignment':'study',source:'用户添加的事项'};
+  S.boardCustom.push(item);save();$(prefix+'Title').value='';$(prefix+'Due').value='';$(prefix+'End').value='';
+  if(start){boardMonth=new Date(start+'T12:00:00');boardSelectedDate=start;}
+  renderBoard();toast('已加入看板与日历');
+}
 
 /* =========================================================
    今日页渲染
@@ -1161,6 +1303,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     $('page-'+t.dataset.page).classList.add('active');
     window.scrollTo({top:0,behavior:'smooth'});
     if(t.dataset.page==='fitness') renderFitness();
+    if(t.dataset.page==='board') renderBoard();
     if(t.dataset.page==='money') renderMoney();
     if(t.dataset.page==='stats') renderStats();
   });
@@ -1175,7 +1318,7 @@ $('budgetModal').addEventListener('click', e=>{ if(e.target===$('budgetModal')) 
 $('txAmt').addEventListener('keydown', e=>{ if(e.key==='Enter') addTx(); });
 
 function renderAll(){
-  renderToday(); renderFitness(); renderMoney(); renderStats();
+  renderToday(); renderBoard(); renderFitness(); renderMoney(); renderStats();
 }
 renderAll();
 afterChange();
