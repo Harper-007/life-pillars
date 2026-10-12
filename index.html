@@ -520,7 +520,7 @@ window.addEventListener('error', function(e){
    数据存储
    ========================================================= */
 const KEY = 'zhidian_v1';
-const todayStr = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const todayStr = () => new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 
 /* =========================================================
    学业主线：3 门课程 + Capstone
@@ -781,7 +781,7 @@ function planDone(d=todayStr()){ return S.plan[d] || (S.plan[d]=[]); }
 /* =========================================================
    学习待办看板：颜色日历 + 两类可勾选任务
    ========================================================= */
-let boardMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let boardMonth = (()=>{const [y,m]=todayStr().split('-').map(Number);return new Date(y,m-1,1);})();
 let boardSelectedDate = todayStr();
 const boardDate = (y,m,d)=>`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 const boardMonthName = d=>`${d.getFullYear()}年${d.getMonth()+1}月`;
@@ -807,7 +807,7 @@ function renderBoard(){
       const colors=[...new Set(matches.map(e=>BOARD_COLORS[e.type]||BOARD_COLORS.study))].slice(0,4);
       return {dt,value,n,inMonth,colors};
     });
-    html+=`<div class="cal-week"><div class="cal-week-dates">${ds.map(c=>`<div class="cal-day ${c.inMonth?'':'outside'} ${c.value===todayStr()?'today':''} ${c.value===boardSelectedDate?'selected':''}" onclick="selectBoardDate('${c.value}')"><span class="day-num">${c.dt.getDate()}</span><span class="day-dots">${c.colors.map(color=>`<i style="background:${color}"></i>`).join('')}</span></div>`).join('')}</div>`;
+    html+=`<div class="cal-week"><div class="cal-week-dates">${ds.map(c=>`<div class="cal-day ${c.inMonth?'':'outside'} ${c.value===todayStr()?'today':''} ${c.value===boardSelectedDate?'selected':''}" data-date="${c.value}" onclick="selectBoardDate('${c.value}')"><span class="day-num">${c.dt.getDate()}</span><span class="day-dots">${c.colors.map(color=>`<i style="background:${color}"></i>`).join('')}</span></div>`).join('')}</div>`;
     const weekStart=ds[0].value,weekEnd=ds[6].value,active=events.filter(e=>e.start<e.end&&dateOverlap(e.start,e.end,weekStart,weekEnd)).sort((a,b)=>a.start.localeCompare(b.start)||a.end.localeCompare(b.end));
     const lanes=[];let bars='';
     active.forEach(e=>{
@@ -866,7 +866,7 @@ const openState = {};
 
 function renderToday(){
   ensureDailyStudyPlan();
-  const d = new Date();
+  const d = new Date(todayStr()+'T12:00:00');
   const wk = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
   $('todayDate').textContent = `${d.getMonth()+1}月${d.getDate()}日 ${wk}`;
   $('fitDate').textContent = `${d.getMonth()+1}月${d.getDate()}日 ${wk}`;
