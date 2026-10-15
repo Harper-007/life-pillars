@@ -77,13 +77,15 @@
     if(!s.money.rewards||typeof s.money.rewards!=='object'||Array.isArray(s.money.rewards))s.money.rewards={};
     for(const taskList of Object.values(s.tasks))if(!Array.isArray(taskList)||taskList.some(t=>!t||!/^[\w-]+$/.test(t.id)||typeof t.txt!=='string'))throw Error('任务格式无效');
     const validId=id=>typeof id==='string'&&/^[\w-]+$/.test(id);
+    const checkBoard=o=>{if(o.type!=null&&!['assignment','study','exam','project','capstone','school'].includes(o.type))throw Error('看板分类无效');for(const k of ['start','end','due'])if(o[k]&&!dateOK(o[k]))throw Error('看板日期无效');eventFor(o);};
     for(const [day,lists] of Object.entries(s.dailyTasks)){if(!dateOK(day)||!lists||typeof lists!=='object')throw Error('每日任务日期无效');for(const list of Object.values(lists))if(!Array.isArray(list)||list.some(t=>!t||!validId(t.id)||typeof t.txt!=='string'))throw Error('每日任务格式无效');}
     for(const [day,list] of Object.entries(s.activities))if(!dateOK(day)||!Array.isArray(list)||list.some(x=>!x||!validId(x.id)||typeof x.title!=='string'||!Number.isInteger(x.minutes)||x.minutes<1||x.minutes>1440||typeof x.area!=='string'||(x.outcome!=null&&typeof x.outcome!=='string')))throw Error('实际完成记录无效');
     for(const [day,r] of Object.entries(s.reviews))if(!dateOK(day)||!r||typeof r!=='object'||['learn','block','next'].some(k=>r[k]!=null&&typeof r[k]!=='string'))throw Error('复盘格式无效');
-    for(const [id,o] of Object.entries(s.boardOverrides)){if(!validId(id)||!o||typeof o!=='object')throw Error('看板编辑数据无效');eventFor(o);}
+    for(const [id,o] of Object.entries(s.boardOverrides)){if(!validId(id)||!o||typeof o!=='object')throw Error('看板编辑数据无效');checkBoard(o);}
+    for(const [day,r] of Object.entries(s.civilLogs))if(!dateOK(day)||!r||typeof r.type!=='string'||typeof r.note!=='string'||!Number.isInteger(r.total)||!Number.isInteger(r.right)||r.total<1||r.total>200||r.right<0||r.right>r.total)throw Error('考公记录格式无效');
     for(const r of Object.values(s.money.rewards)){if(!r||!/^\d{4}-\d{2}$/.test(r.month))throw Error('奖励记录无效');cents(r.amount);}
     for(const item of s.boardCustom)if(!item||!/^[\w-]+$/.test(item.id)||typeof item.title!=='string'||!['assignment','important'].includes(item.section))throw Error('看板事项格式无效');
-    for(const item of s.boardCustom)eventFor(item);
+    for(const item of s.boardCustom)checkBoard(item);
     return s;
   }
   root.PillarCore={dateOK,cents,shift,week,budget,totals,eventFor,parseICS,mergeICS,normalize};
