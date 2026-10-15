@@ -505,6 +505,7 @@ input,select,textarea{font-size:16px!important;}
 <input type="file" id="fileInput" accept="application/json" style="display:none">
 <div class="toast" id="toast"></div>
 
+<script src="./core.js"></script>
 <script>
 /* ===== 全局错误提示（方便诊断手机端问题） ===== */
 window.addEventListener('error', function(e){
@@ -645,18 +646,23 @@ function generatedStudyPlan(day){
 
 function ensureDailyStudyPlan(){
   const day=todayStr();
+  S.dailyTasks=S.dailyTasks||{};
+  if(S.studyPlanDate&&S.studyPlanDate!==day&&!S.dailyTasks[S.studyPlanDate])S.dailyTasks[S.studyPlanDate]=JSON.parse(JSON.stringify(S.tasks));
   if(S.studyPlanVersion!==2){
     S.tasks.study=(S.tasks.study||[]).filter(t=>!['s1','s2','s3'].includes(t.id) && !String(t.id).startsWith('plan-'));
     S.studyPlanVersion=2;
     S.studyPlanDate='';
   }
   if(S.studyPlanDate!==day){
-    const custom=(S.tasks.study||[]).filter(t=>String(t.id).startsWith('u'));
+    const custom=S.studyPlanDate?[]:(S.tasks.study||[]).filter(t=>String(t.id).startsWith('u'));
     const planned=(generatedStudyPlan(day)||[]).map((txt,i)=>({id:`plan-${day}-${i}`,txt}));
-    S.tasks.study=[...planned,...custom];
+    const tasks=JSON.parse(JSON.stringify(DEFAULT_STATE.tasks));
+    tasks.study=[...planned,...custom];
+    S.tasks=S.dailyTasks[day]||tasks;
     S.studyPlanDate=day;
     save();
   }
+  S.dailyTasks[day]=JSON.parse(JSON.stringify(S.tasks));
 }
 
 const DEFAULT_STATE = {
@@ -706,8 +712,8 @@ function load(){
     merged.streak = Object.assign(base.streak, d.streak||{});
     merged.boardDone = Object.assign(base.boardDone, d.boardDone||{});
     merged.boardCustom = Array.isArray(d.boardCustom)?d.boardCustom:[];
-    return merged;
-  }catch(e){ return JSON.parse(JSON.stringify(DEFAULT_STATE)); }
+    return PillarCore.normalize(merged,DEFAULT_STATE);
+  }catch(e){ const raw=localStorage.getItem(KEY);if(raw){try{localStorage.setItem(KEY+'-recovery-'+Date.now(),raw);}catch(_){} }return JSON.parse(JSON.stringify(DEFAULT_STATE)); }
 }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('保存失败：浏览器存储空间不足'); } }
 
@@ -804,7 +810,7 @@ function renderBoard(){
     const ds=Array.from({length:7},(_,i)=>{
       const n=w*7+i-offset+1,dt=new Date(y,m,n),value=boardDate(dt.getFullYear(),dt.getMonth(),dt.getDate()),inMonth=dt.getMonth()===m;
       const matches=events.filter(e=>dateOverlap(e.start,e.end,value,value));
-      const colors=[...new Set(matches.map(e=>BOARD_COLORS[e.type]||BOARD_COLORS.study))].slice(0,4);
+      const colors=[...new Set(matches.map(e=>typeof boardColor==='function'?boardColor(e):BOARD_COLORS[e.type]||BOARD_COLORS.study))].slice(0,4);
       return {dt,value,n,inMonth,colors};
     });
     html+=`<div class="cal-week"><div class="cal-week-dates">${ds.map(c=>`<div class="cal-day ${c.inMonth?'':'outside'} ${c.value===todayStr()?'today':''} ${c.value===boardSelectedDate?'selected':''}" data-date="${c.value}" onclick="selectBoardDate('${c.value}')"><span class="day-num">${c.dt.getDate()}</span><span class="day-dots">${c.colors.map(color=>`<i style="background:${color}"></i>`).join('')}</span></div>`).join('')}</div>`;
@@ -815,7 +821,8 @@ function renderBoard(){
       let lane=0;while(lanes[lane]&&lanes[lane].some(r=>!(t<r[0]||s>r[1])))lane++;
       (lanes[lane]||(lanes[lane]=[])).push([s,t]);
       const label=s===0&&e.start<weekStart?`${e.title}（续）`:e.title;
-      bars+=`<div class="week-bar ${e.type}" style="grid-column:${s+1}/span ${t-s+1};grid-row:${lane+1}" title="${esc(e.title)}">${esc(label)}</div>`;
+      const color=typeof boardColor==='function'?boardColor(e):BOARD_COLORS[e.type]||BOARD_COLORS.study;
+      bars+=`<div class="week-bar ${e.type}" style="background:${color};grid-column:${s+1}/span ${t-s+1};grid-row:${lane+1}" title="${esc(e.title)}">${esc(label)}</div>`;
     });
     if(bars)html+=`<div class="week-bars" style="grid-template-rows:repeat(${lanes.length},17px)">${bars}</div>`;
     html+='</div>';
@@ -828,7 +835,7 @@ function selectBoardDate(date){boardSelectedDate=date;renderBoard();}
 function renderBoardAgenda(events=boardEvents()){
   const found=events.filter(e=>dateOverlap(e.start,e.end,boardSelectedDate,boardSelectedDate));
   $('agendaDate').textContent=boardLongDate(boardSelectedDate);$('agendaCount').textContent=found.length?`${found.length} 项`:'无事项';
-  $('boardAgenda').innerHTML=found.length?found.map(e=>`<div class="board-event"><i class="event-mark" style="background:${BOARD_COLORS[e.type]||BOARD_COLORS.study}"></i><div class="event-content"><b>${esc(e.title)}</b><small>${e.start===e.end?boardLongDate(e.start):`${boardLongDate(e.start)}—${boardLongDate(e.end)} · 持续中`} · ${esc(e.detail||'')}</small></div>${e.taskId?`<input class="event-check" type="checkbox" ${S.boardDone[e.taskId]?'checked':''} onchange="toggleBoardItem('${esc(e.taskId)}')" aria-label="完成事项">`:''}</div>`).join(''):'<div class="empty" style="padding:14px">当天没有安排，可以把邮件或 BB/BR 通知添加到下方看板</div>';
+  $('boardAgenda').innerHTML=found.length?found.map(e=>`<div class="board-event"><i class="event-mark" style="background:${typeof boardColor==='function'?boardColor(e):BOARD_COLORS[e.type]||BOARD_COLORS.study}"></i><div class="event-content"><b>${esc(e.title)}</b><small>${e.start===e.end?boardLongDate(e.start):`${boardLongDate(e.start)}—${boardLongDate(e.end)} · 持续中`} · ${esc(e.detail||'')}${e.startAt?' · '+new Date(e.startAt).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'}):''}${e.endAt?' 至 '+new Date(e.endAt).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'}):''}</small></div>${e.taskId?`<input class="event-check" type="checkbox" ${S.boardDone[e.taskId]?'checked':''} onchange="toggleBoardItem('${esc(e.taskId)}')" aria-label="完成事项">`:''}</div>`).join(''):'<div class="empty" style="padding:14px">当天没有安排，可以把邮件或 BB/BR 通知添加到下方看板</div>';
 }
 function boardSourceLink(item){
   if((item.source||'').includes('Outlook'))return `<a class="board-source" href="https://outlook.office.com/mail/" target="_blank" rel="noopener">↗ 打开 Outlook，按邮件主题查找</a>`;
@@ -913,7 +920,7 @@ function renderToday(){
       <div class="task ${ch[t.id]?'checked':''}">
         <div class="chk ${ch[t.id]?'on':''}" onclick="toggleTask('${p.key}','${t.id}')"></div>
         <div class="t-txt" onclick="toggleTask('${p.key}','${t.id}')">${esc(t.txt)}</div>
-        <button class="del" onclick="delTask('${p.key}','${t.id}')" title="删除">✕</button>
+        <div class="task-actions"><button onclick="editTodayTask('${p.key}','${t.id}')">编辑</button><button onclick="moveToTomorrow('${p.key}','${t.id}')">移到明天</button><button class="del" onclick="delTask('${p.key}','${t.id}')" title="删除">✕</button></div>
       </div>`).join('');
     if(!list.length) items = '<div class="empty">还没有任务，加一个吧</div>';
 
@@ -1284,7 +1291,7 @@ $('fileInput').addEventListener('change', e=>{
     try{
       const d=JSON.parse(r.result);
       if(!d || typeof d!=='object') throw 0;
-      S=Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), d);
+      S=PillarCore.normalize(d,DEFAULT_STATE);
       save(); renderAll(); toast('数据已恢复 ✓');
     }catch(err){ toast('文件格式不对，导入失败'); }
   };
@@ -1323,6 +1330,8 @@ function renderAll(){
 renderAll();
 afterChange();
 </script>
+<script src="./enhancements.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
 </body>
 </html>
+

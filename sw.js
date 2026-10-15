@@ -1,5 +1,5 @@
-const CACHE='pillars-v7';
-const ASSETS=['./','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CACHE='pillars-v8';
+const ASSETS=['./','./core.js','./enhancements.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
   self.skipWaiting();
@@ -25,3 +25,4 @@ self.addEventListener('fetch',event=>{
     return response;
   }).catch(()=>caches.match(request)));
 });
+
