@@ -6,7 +6,7 @@ const yuan=n=>'¥'+(n/100).toFixed(2);
 const monthBounds=day=>[day.slice(0,7)+'-01',day.slice(0,7)+'-'+new Date(Number(day.slice(0,4)),Number(day.slice(5,7)),0).getDate()];
 const proposedPlan=()=>({income:4000,saving:800,fixed:0,reward:200,weekly:600,caps:{}});
 const getPlan=()=>S.money.plan||proposedPlan();
-S.money.vault=S.money.vault||[];S.money.rewards=S.money.rewards||{};
+S.money.vault=S.money.vault||[];S.money.rewards=S.money.rewards||{};S.money.wishes=S.money.wishes||[];
 S.reviews=S.reviews||{};S.activities=S.activities||{};S.dailyTasks=S.dailyTasks||{};S.boardOverrides=S.boardOverrides||{};S.civilLogs=S.civilLogs||{};S.priorityBoard=S.priorityBoard||{};
 
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -17,7 +17,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 const oldRenderToday=renderToday;
 renderToday=function(){oldRenderToday();renderPriorityBoard();renderReview();renderCivil();renderUpcoming();};
 const oldRenderMoney=renderMoney;
-renderMoney=function(){if(S.money.plan)S.money.budget=C.budget(S.money.plan,todayStr()).spend/100;oldRenderMoney();renderFinance();};
+renderMoney=function(){if(S.money.plan)S.money.budget=C.budget(S.money.plan,todayStr()).spend/100;oldRenderMoney();renderFinance();renderWishes();};
 const oldAddTask=addTask,oldDelTask=delTask;
 addTask=function(key,input){oldAddTask(key,input);snapshotToday();renderToday();};
 delTask=function(key,id){oldDelTask(key,id);snapshotToday();renderToday();};
@@ -124,4 +124,16 @@ $('bbICS').addEventListener('change',async e=>{const file=e.target.files[0];if(!
 // 替换旧导入处理，先校验完整备份，失败不改当前数据。
 const filePicker=$('fileInput').cloneNode(true);$('fileInput').replaceWith(filePicker);filePicker.addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>10e6)throw Error('备份文件过大');const candidate=C.normalize(JSON.parse(await file.text()),DEFAULT_STATE);S=candidate;S.money.vault=S.money.vault||[];S.money.rewards=S.money.rewards||{};save();renderAll();toast('已恢复备份');}catch(err){toast('恢复失败，原数据保留：'+err.message);}e.target.value='';});
 window.addEventListener('focus',()=>{renderToday();renderMoney();});
+const wishHost=document.createElement('div');$('page-money').querySelector('.money-hero')?.after(wishHost);
+if(!wishHost.isConnected)$('page-money').append(wishHost);
+function renderWishes(){
+ const wishes=S.money.wishes||[],month=todayStr().slice(0,7),[start,end]=monthBounds(todayStr());
+ const available=Math.max(0,Object.values(S.money.rewards||{}).filter(x=>x.month===month).reduce((n,x)=>n+C.cents(x.amount),0)-C.totals(S.money.txs,start,end).reward);
+ wishHost.innerHTML=`<div class="feature-card"><h3>愿望口袋 · 先放下，再决定</h3><p>刷到想买的，先存这里，离开购物页面，起身喝水或休息两分钟。48小时后再看是否还需要；这是提醒，不保证消除冲动。</p><div class="feature-grid"><label>想要什么<input id="wishName" maxlength="200"></label><label>预计价格（元）<input id="wishPrice" type="number" min="0.01" step="0.01"></label><label class="wide">为什么现在想买<input id="wishReason" maxlength="300" placeholder="实际需要 / 压力 / 刷到推荐 / 其他"></label></div><button onclick="addWish()">先放进口袋</button><p>已解锁奖励剩余 ${yuan(available)}。先完成原定任务；休息无需赚取，也不必每次都购物奖励。</p>${wishes.map(w=>{const hours=Math.max(0,Math.ceil((w.createdAt+48*3600000-Date.now())/3600000));return `<div class="review-entry"><b>${esc(w.name)}</b> · ${yuan(C.cents(w.price))}<small>${esc(w.reason||'未填原因')} · ${hours?'再等约'+hours+'小时':'冷静期已过，可重新比较需要与预算'}</small><button onclick="prepareWish('${w.id}')" ${hours?'disabled':''}>带入记账草稿</button><button onclick="removeWish('${w.id}')">不想要了 / 移出口袋</button></div>`;}).join('')}<p>带入草稿不会扣款或记账。买后核对实际金额、日期和分类，再点“记录”；奖励勾选沿用原额度校验，保存后可移出口袋。</p></div>`;
+}
+function addWish(){try{const name=$('wishName').value.trim(),price=C.cents($('wishPrice').value);if(!name||!price)throw Error('请填写名称和大于0的价格');(S.money.wishes||(S.money.wishes=[])).push({id:'wish-'+Date.now(),name,price:price/100,reason:$('wishReason').value.trim(),createdAt:Date.now()});save();renderWishes();toast('已放进口袋，先回到当前生活');}catch(e){toast(e.message);}}
+function removeWish(id){S.money.wishes=(S.money.wishes||[]).filter(w=>w.id!==id);save();renderWishes();}
+function prepareWish(id){const w=(S.money.wishes||[]).find(w=>w.id===id);if(!w||Date.now()<w.createdAt+48*3600000)return toast('先等冷静期结束');$('txName').value=w.name;$('txAmt').value=w.price;$('txCat').value='购物';$('txType').value='out';$('txDate').value=todayStr();$('txFixed').checked=false;$('txReward').checked=false;$('txName').scrollIntoView({behavior:'smooth',block:'center'});toast('只是草稿，购买后核对实际金额再保存');}
+
+
 renderAll();syncStatus();
