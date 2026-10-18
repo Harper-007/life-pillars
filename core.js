@@ -68,7 +68,7 @@
     if(!data||typeof data!=='object'||Array.isArray(data)||!data.tasks||!data.money)throw Error('不是支点备份文件');
     const s=JSON.parse(JSON.stringify(defaults));
     Object.assign(s,data);s.tasks={...defaults.tasks,...data.tasks};s.money={...defaults.money,...data.money};s.streak={...defaults.streak,...data.streak};
-    for(const key of ['checks','mood','body','plan','boardDone','boardOverrides','dailyTasks','reviews','activities','civilLogs'])if(!s[key]||typeof s[key]!=='object'||Array.isArray(s[key]))s[key]={};
+    for(const key of ['checks','mood','body','plan','boardDone','boardOverrides','dailyTasks','reviews','activities','civilLogs','priorityBoard'])if(!s[key]||typeof s[key]!=='object'||Array.isArray(s[key]))s[key]={};
     for(const key of ['boardCustom'])if(!Array.isArray(s[key]))s[key]=[];
     if(!Array.isArray(s.money.txs))throw Error('流水数据格式不正确');
     for(const tx of s.money.txs){if(!tx||!/^[\w-]+$/.test(tx.id)||!dateOK(tx.date)||!['out','in'].includes(tx.type))throw Error('流水日期或类型无效');cents(tx.amt);}
@@ -80,6 +80,7 @@
     const checkBoard=o=>{if(o.type!=null&&!['assignment','study','exam','project','capstone','school'].includes(o.type))throw Error('看板分类无效');for(const k of ['start','end','due'])if(o[k]&&!dateOK(o[k]))throw Error('看板日期无效');eventFor(o);};
     for(const [day,lists] of Object.entries(s.dailyTasks)){if(!dateOK(day)||!lists||typeof lists!=='object')throw Error('每日任务日期无效');for(const list of Object.values(lists))if(!Array.isArray(list)||list.some(t=>!t||!validId(t.id)||typeof t.txt!=='string'))throw Error('每日任务格式无效');}
     for(const [day,list] of Object.entries(s.activities))if(!dateOK(day)||!Array.isArray(list)||list.some(x=>!x||!validId(x.id)||typeof x.title!=='string'||!Number.isInteger(x.minutes)||x.minutes<1||x.minutes>1440||typeof x.area!=='string'||(x.outcome!=null&&typeof x.outcome!=='string')))throw Error('实际完成记录无效');
+    for(const [day,b] of Object.entries(s.priorityBoard)){if(!dateOK(day)||!b||typeof b!=='object'||!b.placements||typeof b.placements!=='object'||!Array.isArray(b.tasks))throw Error('今日象限格式无效');for(const [id,q] of Object.entries(b.placements))if(!validId(id)||!['quick','focus','batch','defer'].includes(q))throw Error('今日象限分类无效');for(const t of b.tasks)if(!t||!validId(t.id)||typeof t.txt!=='string'||t.txt.length>160||!['quick','focus','batch','defer'].includes(t.quadrant))throw Error('今日临时任务格式无效');}
     for(const [day,r] of Object.entries(s.reviews))if(!dateOK(day)||!r||typeof r!=='object'||['learn','block','next'].some(k=>r[k]!=null&&typeof r[k]!=='string'))throw Error('复盘格式无效');
     for(const [id,o] of Object.entries(s.boardOverrides)){if(!validId(id)||!o||typeof o!=='object')throw Error('看板编辑数据无效');checkBoard(o);}
     for(const [day,r] of Object.entries(s.civilLogs))if(!dateOK(day)||!r||typeof r.type!=='string'||typeof r.note!=='string'||!Number.isInteger(r.total)||!Number.isInteger(r.right)||r.total<1||r.total>200||r.right<0||r.right>r.total)throw Error('考公记录格式无效');
