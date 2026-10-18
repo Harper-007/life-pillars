@@ -354,6 +354,8 @@ input,select,textarea{font-size:16px!important;}
       </div>
     </div>
 
+    <div id="priorityBoardHost"></div>
+
     <div class="sec-title">
       <h2>今日支点</h2>
       <span class="sub" id="taskSummary"></span>
@@ -555,6 +557,10 @@ const STUDY_PLAN_EXACT = {
   '2026-11-01':['【周复盘·45m】检查四条主线：6007实验≥3组、6006数据可得、6002方案成形、Capstone≥6篇','【CIE6007项目·90m】根据实验结果锁定报告主结论，列出仍缺的2个证据','【缓冲·45m】清理本周未完成项；若全部完成，提前做下周最高风险任务']
 };
 
+const CAREER_PLAN_EXACT = {
+  '2026-10-20':['【牛客摸底·90m】使用 Python ACM 模式独立完成3题：数组/字符串简单题、哈希/双指针/二分中等题、树/搜索/基础动态规划中等题；记录完成时间、通过率和卡点']
+};
+
 function generatedStudyPlan(day){
   if(STUDY_PLAN_EXACT[day]) return STUDY_PLAN_EXACT[day];
   const d=new Date(day+'T12:00:00');
@@ -659,6 +665,10 @@ function ensureDailyStudyPlan(){
     const tasks=JSON.parse(JSON.stringify(DEFAULT_STATE.tasks));
     tasks.study=[...planned,...custom];
     S.tasks=S.dailyTasks[day]||tasks;
+    (CAREER_PLAN_EXACT[day]||[]).forEach((txt,i)=>{
+      const id=`career-plan-${day}-${i}`;
+      if(!(S.tasks.career||[]).some(t=>t.id===id))(S.tasks.career=S.tasks.career||[]).push({id,txt});
+    });
     S.studyPlanDate=day;
     save();
   }
@@ -741,6 +751,13 @@ const MOODS = ['😫','😔','😐','🙂','😄'];
 
 /* 学期作业与事项：官方日期来自 Outlook/课程安排，计划检查点明确标为计划。 */
 const BOARD_ITEMS = [
+  {id:'i-career-niuke-baseline',section:'important',title:'职业｜牛客 Python 摸底（90分钟）',due:'2026-10-20',start:'2026-10-20',type:'study',source:'职业规划讨论确认：独立完成3题并记录完成时间、通过率和卡点'},
+  {id:'i-career-niuke-basics',section:'important',title:'职业｜牛客基础补强：模板、ACM输入输出与错题记录',due:'2026-10-31',start:'2026-10-21',end:'2026-10-31',type:'study',source:'摸底后按卡点调整题量；优先数组、字符串、哈希、二分、栈队列、树与基础搜索/动态规划'},
+  {id:'i-career-niuke-company',section:'important',title:'职业｜牛客公司题与限时模拟',due:'2026-11-15',start:'2026-11-01',end:'2026-11-15',type:'study',source:'以字节及目标岗位题型为主；具体频次在摸底复盘后确定'},
+  {id:'i-career-resume-ready',section:'important',title:'职业｜简历充实完成，达到投递标准',due:'2026-10-31',start:'2026-10-16',type:'project',source:'职业规划讨论确认：具体补强项目仍待定稿'},
+  {id:'i-career-application-window',section:'important',title:'职业｜第一段实习集中投递与面试',due:'2026-11-15',start:'2026-11-01',end:'2026-11-15',type:'project',source:'职业规划讨论确认：AI、后端、平台、数据及ToB技术研发均可'},
+  {id:'i-career-internship-one',section:'important',title:'职业｜第一段实习目标周期',due:'2027-02-14',start:'2026-11-16',end:'2027-02-14',type:'project',source:'职业规划讨论确认：11月16日前目标入职，寒假结束前完成并沉淀简历成果'},
+  {id:'i-career-internship-two',section:'important',title:'职业｜第二段暑期实习：第一段期间关注并提前投递',due:'',start:'',type:'project',source:'职业规划讨论确认：以2027暑期实习为目标；开放时间和DDL待目标公司官方信息确认'},
   {id:'a-6006-team',section:'assignment',title:'CIE6006｜Urban Data Analysis 项目组信息登记',due:'2026-10-31',start:'2026-09-21',type:'assignment',source:'Outlook：CIE6006 Project Team Registration（9/21）'},
   {id:'a-6006-m1',section:'assignment',title:'CIE6006 项目计划检查点｜锁定问题、两类数据源与 >1000 条数据可行性',due:'2026-10-30',start:'2026-10-12',type:'project',source:'支点倒排检查点（计划日期，非教师官方 DDL）'},
   {id:'a-6006-m2',section:'assignment',title:'CIE6006 项目计划检查点｜完成数据获取/清洗，输出字段表与缺失率',due:'2026-11-08',start:'2026-10-31',type:'project',source:'支点倒排检查点（计划日期，非教师官方 DDL）'},
@@ -917,7 +934,7 @@ function renderToday(){
     const allDone = list.length>0 && dn===list.length;
     const isOpen = openState[p.key]!==undefined ? openState[p.key] : !allDone;
     let items = list.map(t=>`
-      <div class="task ${ch[t.id]?'checked':''}">
+      <div class="task ${ch[t.id]?'checked':''}" draggable="true" ondragstart="dragPriorityTask(event,'${p.key}','${t.id}')">
         <div class="chk ${ch[t.id]?'on':''}" onclick="toggleTask('${p.key}','${t.id}')"></div>
         <div class="t-txt" onclick="toggleTask('${p.key}','${t.id}')">${esc(t.txt)}</div>
         <div class="task-actions"><button onclick="editTodayTask('${p.key}','${t.id}')">编辑</button><button onclick="moveToTomorrow('${p.key}','${t.id}')">移到明天</button><button class="del" onclick="delTask('${p.key}','${t.id}')" title="删除">✕</button></div>
@@ -1334,4 +1351,5 @@ afterChange();
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{});}</script>
 </body>
 </html>
+
 
