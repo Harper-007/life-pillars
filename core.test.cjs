@@ -35,4 +35,9 @@ assert.equal(C.normalize({...defaults,money:{txs:[{id:'t1',date:'2026-10-15',typ
 assert.throws(()=>C.normalize({...defaults,activities:{'2026-10-15':[{id:"x');alert(1)",minutes:20,title:'x',area:'课程'}]}},defaults));
 for(const block of fs.readFileSync(__dirname+'/index.html','utf8').matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))new vm.Script(block[1]);
 new vm.Script(fs.readFileSync(__dirname+'/enhancements.js','utf8'));
+const wish={id:'wish-1',name:'耳机',price:99,reason:'刷到推荐',createdAt:Date.now()};
+const pocket={...defaults,money:{txs:[],wishes:[wish]}};
+assert.equal(C.normalize(pocket,defaults).money.wishes[0].price,99);
+assert.throws(()=>C.normalize({...pocket,money:{txs:[],wishes:[{...wish,id:"bad'"}]}},defaults));
+assert.throws(()=>C.normalize({...pocket,money:{txs:[],wishes:[{...wish,price:0}]}},defaults));
 console.log('PASS: budget, date ranges, ICS time zones/deduplication/changes, legacy data, import validation, script syntax');
