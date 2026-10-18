@@ -937,7 +937,7 @@ function renderToday(){
       <div class="task ${ch[t.id]?'checked':''}" draggable="true" ondragstart="dragPriorityTask(event,'${p.key}','${t.id}')">
         <div class="chk ${ch[t.id]?'on':''}" onclick="toggleTask('${p.key}','${t.id}')"></div>
         <div class="t-txt" onclick="toggleTask('${p.key}','${t.id}')">${esc(t.txt)}</div>
-        <div class="task-actions"><button onclick="editTodayTask('${p.key}','${t.id}')">编辑</button><button onclick="moveToTomorrow('${p.key}','${t.id}')">移到明天</button><button class="del" onclick="delTask('${p.key}','${t.id}')" title="删除">✕</button></div>
+        <div class="task-actions"><select aria-label="放入今日象限" onchange="assignPriorityTask('${p.key}','${t.id}',this.value)"><option value="">移入象限</option><option value="quick">高影响·低精力</option><option value="focus">高影响·高精力</option><option value="batch">低影响·低精力</option><option value="defer">低影响·高精力</option></select><button onclick="editTodayTask('${p.key}','${t.id}')">编辑</button><button onclick="moveToTomorrow('${p.key}','${t.id}')">移到明天</button><button class="del" onclick="delTask('${p.key}','${t.id}')" title="删除">✕</button></div>
       </div>`).join('');
     if(!list.length) items = '<div class="empty">还没有任务，加一个吧</div>';
 
