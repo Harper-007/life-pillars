@@ -86,6 +86,8 @@
     for(const r of Object.values(s.money.rewards)){if(!r||!/^\d{4}-\d{2}$/.test(r.month))throw Error('奖励记录无效');cents(r.amount);}
     for(const item of s.boardCustom)if(!item||!/^[\w-]+$/.test(item.id)||typeof item.title!=='string'||!['assignment','important'].includes(item.section))throw Error('看板事项格式无效');
     for(const item of s.boardCustom)checkBoard(item);
+    if(s.money.wishes!=null&&(!Array.isArray(s.money.wishes)||s.money.wishes.some(w=>!w||!validId(w.id)||typeof w.name!=='string'||!w.name.trim()||w.name.length>200||typeof w.reason!=='string'||w.reason.length>300||!Number.isFinite(w.createdAt)||w.createdAt<0)))throw Error('愿望口袋格式无效');
+    for(const w of s.money.wishes||[])if(!cents(w.price))throw Error('愿望价格必须大于0');
     return s;
   }
   root.PillarCore={dateOK,cents,shift,week,budget,totals,eventFor,parseICS,mergeICS,normalize};
