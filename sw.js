@@ -1,4 +1,4 @@
-const CACHE='pillars-v10';
+const CACHE='pillars-v11';
 const ASSETS=['./','./core.js','./enhancements.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
