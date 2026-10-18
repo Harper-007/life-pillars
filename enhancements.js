@@ -7,7 +7,7 @@ const monthBounds=day=>[day.slice(0,7)+'-01',day.slice(0,7)+'-'+new Date(Number(
 const proposedPlan=()=>({income:4000,saving:800,fixed:0,reward:200,weekly:600,caps:{}});
 const getPlan=()=>S.money.plan||proposedPlan();
 S.money.vault=S.money.vault||[];S.money.rewards=S.money.rewards||{};
-S.reviews=S.reviews||{};S.activities=S.activities||{};S.dailyTasks=S.dailyTasks||{};S.boardOverrides=S.boardOverrides||{};S.civilLogs=S.civilLogs||{};
+S.reviews=S.reviews||{};S.activities=S.activities||{};S.dailyTasks=S.dailyTasks||{};S.boardOverrides=S.boardOverrides||{};S.civilLogs=S.civilLogs||{};S.priorityBoard=S.priorityBoard||{};
 
 document.head.insertAdjacentHTML('beforeend',`<style>
  .feature-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0}.feature-card h3{margin:0 0 10px;font-size:16px}.feature-card p{color:var(--txt2);font-size:13px}.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.feature-card label,.settings-label{display:block;font-size:12px;color:var(--txt2);margin:8px 0}.feature-card input,.feature-card textarea,.feature-card select,.settings-label input{background:#16172b;border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--txt);width:100%;font-family:inherit}.feature-card textarea{min-height:72px;resize:vertical}.feature-card button,.feature-btn{background:#30294f;color:var(--txt);border:1px solid var(--accent);border-radius:10px;padding:8px 12px;font-family:inherit;cursor:pointer;margin:4px 3px 4px 0}.feature-card .wide{grid-column:1/-1}.pie-layout{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.pie{width:164px;height:164px;border-radius:50%;flex-shrink:0}.pie-legend{flex:1;min-width:180px}.pie-row{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:4px}.pie-row i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}.mini-bar{height:6px;background:#363751;border-radius:9px;overflow:hidden;margin:4px 0 8px}.mini-bar i{display:block;height:100%;background:var(--cyan)}.warn{color:var(--orange)!important}.muted{font-size:12px;color:var(--txt2)}.task-actions{display:flex;gap:4px;flex-direction:column}.task-actions button{font-size:11px;background:none;color:var(--txt2);border:0;padding:2px;cursor:pointer}.modal{max-height:90vh;overflow-y:auto}.review-entry{border-top:1px solid var(--line);padding:9px 0;font-size:13px}.review-entry small{display:block;color:var(--txt2)}.board-controls{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}.board-controls button{border:1px solid var(--line);background:#242842;color:var(--txt2);border-radius:7px;font-size:11px;padding:3px 7px}.color-input{min-height:38px}.source-chip{font-size:10px;color:var(--gold)}.feature-card a{color:var(--cyan)}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}@media(max-width:420px){.feature-grid{grid-template-columns:1fr}.pie-layout{justify-content:center}.board-event{flex-wrap:wrap}}
@@ -15,7 +15,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 
 // 今日任务按日期快照；旧用户的当前任务和勾选记录仍在原存储键中。
 const oldRenderToday=renderToday;
-renderToday=function(){oldRenderToday();renderReview();renderCivil();renderUpcoming();};
+renderToday=function(){oldRenderToday();renderPriorityBoard();renderReview();renderCivil();renderUpcoming();};
 const oldRenderMoney=renderMoney;
 renderMoney=function(){if(S.money.plan)S.money.budget=C.budget(S.money.plan,todayStr()).spend/100;oldRenderMoney();renderFinance();};
 const oldAddTask=addTask,oldDelTask=delTask;
@@ -26,6 +26,25 @@ function editTodayTask(key,id){const task=(S.tasks[key]||[]).find(t=>t.id===id);
 function moveToTomorrow(key,id){const task=(S.tasks[key]||[]).find(t=>t.id===id);if(!task)return;const day=C.shift(todayStr(),1);ensureTaskDay(day);S.dailyTasks[day][key].push({...task,id:'u'+Date.now()});S.tasks[key]=S.tasks[key].filter(t=>t.id!==id);snapshotToday();renderToday();toast('已移到明天，可在复盘中查看');}
 function ensureTaskDay(day){if(!S.dailyTasks[day]){const tasks=JSON.parse(JSON.stringify(DEFAULT_STATE.tasks));tasks.study=generatedStudyPlan(day).map((txt,i)=>({id:`plan-${day}-${i}`,txt}));S.dailyTasks[day]=tasks;}return S.dailyTasks[day];}
 
+
+document.head.insertAdjacentHTML('beforeend',`<style>
+#priorityBoardHost{margin-top:14px}.priority-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.priority-cell{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;min-height:120px}.priority-cell h3{font-size:13px;margin:0 0 8px}.priority-cell small{color:var(--txt3)}.priority-item{display:flex;gap:7px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line);font-size:13px}.priority-item span{flex:1}.priority-add{width:100%;margin-top:6px}.priority-cell select{max-width:100%}@media(max-width:420px){.priority-grid{grid-template-columns:1fr 1fr}.priority-cell{padding:8px}}
+</style>`);
+function priorityState(){return S.priorityBoard[todayStr()]||(S.priorityBoard[todayStr()]={placements:{},tasks:[]});}
+function renderPriorityBoard(){
+ const host=$('priorityBoardHost');if(!host)return;
+ const b=priorityState(),tasks=Object.entries(S.tasks||{}).flatMap(([key,list])=>(list||[]).map(t=>({key,...t}))),checks=dayChecks();
+ const names={quick:'快速推进',focus:'安排专注时段',batch:'集中处理',defer:'考虑删减或推迟'};
+ host.innerHTML='<div class="sec-title"><h2>今日影响 × 精力</h2><span class="sub">拖入象限，或用任务旁的菜单</span></div><div class="priority-grid">'+Object.entries(names).map(([q,n])=>`<section class="priority-cell" ondragover="allowPriorityDrop(event)" ondrop="dropPriorityTask(event,'${q}')"><h3>${n}</h3><small>${q==='quick'?'高影响 · 低精力':q==='focus'?'高影响 · 高精力':q==='batch'?'低影响 · 低精力':'低影响 · 高精力'}</small>${tasks.filter(t=>b.placements[t.id]===q).map(t=>`<div class="priority-item" draggable="true" ondragstart="dragPriorityBoardItem(event,'${t.id}')"><button class="chk ${checks[t.id]?'on':''}" aria-label="完成 ${esc(t.txt)}" onclick="toggleTask('${t.key}','${t.id}')"></button><span>${esc(t.txt)}</span><button onclick="assignPriorityTask('${t.key}','${t.id}','')">移出</button></div>`).join('')}${b.tasks.filter(t=>t.quadrant===q).map(t=>`<div class="priority-item" draggable="true" ondragstart="dragPriorityBoardItem(event,'${t.id}')"><button class="chk ${checks[t.id]?'on':''}" aria-label="完成 ${esc(t.txt)}" onclick="togglePriorityCustom('${t.id}')"></button><span>${esc(t.txt)}</span><button class="del" aria-label="删除任务" onclick="deletePriorityCustom('${t.id}')">✕</button></div>`).join('')}<button class="priority-add" onclick="addPriorityCustom('${q}')">＋ 添加临时任务</button></section>`).join('')+'</div>';
+}
+function assignPriorityTask(key,id,q){const b=priorityState();if(q)b.placements[id]=q;else delete b.placements[id];save();renderToday();}
+function dragPriorityTask(ev,key,id){ev.dataTransfer.setData('text/plain',JSON.stringify({key,id}));}
+function dragPriorityBoardItem(ev,id){ev.dataTransfer.setData('text/plain',JSON.stringify({id}));}
+function allowPriorityDrop(ev){ev.preventDefault();}
+function dropPriorityTask(ev,q){ev.preventDefault();try{const d=JSON.parse(ev.dataTransfer.getData('text/plain'));const b=priorityState();if(d.key)b.placements[d.id]=q;else{const t=b.tasks.find(x=>x.id===d.id);if(t)t.quadrant=q;}save();renderToday();}catch{}}
+function addPriorityCustom(q){const txt=prompt('添加一个今日临时任务');if(!txt?.trim())return;const b=priorityState(),id='quick-'+Date.now().toString(36);b.tasks.push({id,txt:txt.trim().slice(0,160),quadrant:q});save();renderToday();}
+function togglePriorityCustom(id){const c=dayChecks();c[id]=!c[id];save();renderToday();afterChange();}
+function deletePriorityCustom(id){const b=priorityState();b.tasks=b.tasks.filter(t=>t.id!==id);delete dayChecks()[id];save();renderToday();}
 const reviewHost=document.createElement('div');reviewHost.id='reflectionPanel';$('page-today').append(reviewHost);
 const civilHost=document.createElement('div');civilHost.id='civilPanel';$('page-today').append(civilHost);
 const upcomingHost=document.createElement('div');upcomingHost.id='todayUpcoming';$('pillarList').before(upcomingHost);
