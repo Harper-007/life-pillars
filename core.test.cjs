@@ -32,6 +32,10 @@ assert.equal(updated.items.length,1);assert.equal(updated.changed,1);assert.equa
 assert.equal(C.mergeICS(updated.items,[{...all,sequence:'4',cancelled:true}],'now').items[0].cancelled,true);
 const defaults={tasks:{study:[]},money:{txs:[]}};
 assert.equal(C.normalize({...defaults,money:{txs:[{id:'t1',date:'2026-10-15',type:'out',amt:12.3}]}},defaults).money.txs[0].amt,12.3);
+const wishDefaults={tasks:{},money:{txs:[],wishes:[]}};
+const wish={id:'wish-test',name:'耳机',price:299.9,reason:'学习需要',createdAt:Date.now()};
+assert.equal(C.normalize({...wishDefaults,money:{txs:[],wishes:[wish]}},wishDefaults).money.wishes[0].price,299.9);
+assert.throws(()=>C.normalize({...wishDefaults,money:{txs:[],wishes:[{...wish,price:0}]}},wishDefaults));
 assert.throws(()=>C.normalize({...defaults,activities:{'2026-10-15':[{id:"x');alert(1)",minutes:20,title:'x',area:'课程'}]}},defaults));
 for(const block of fs.readFileSync(__dirname+'/index.html','utf8').matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))new vm.Script(block[1]);
 new vm.Script(fs.readFileSync(__dirname+'/enhancements.js','utf8'));
