@@ -1,5 +1,5 @@
-const CACHE='pillars-v11';
-const ASSETS=['./','./core.js','./enhancements.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CACHE='pillars-v13';
+const ASSETS=['./','./core.js?v=pillars-v13','./career-roadmap-data.js?v=roadmap-v3','./career-roadmap-ui.js?v=roadmap-v3','./enhancements.js?v=pillars-v13','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
   self.skipWaiting();
